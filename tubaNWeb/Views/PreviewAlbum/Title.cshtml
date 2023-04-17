@@ -1,0 +1,177 @@
+﻿@using tubaNWeb.Models.Preview
+
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+	Layout = "_LayoutPreview";
+	ViewData["Title"] = "시즌";
+
+	bool isAdmin = false;
+	if (Context.Session.GetString("UserId") != null)
+	{
+		string userId = Context.Session.GetString("UserId");
+		if (userId.ToLower().Equals("admin"))
+		{
+			isAdmin = true;
+		}
+	}
+}
+
+
+
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+<style>
+	/*	.bd-placeholder-img {
+			font-size: 1.125rem;
+			text-anchor: middle;
+			-webkit-user-select: none;
+			-moz-user-select: none;
+			user-select: none;
+		}
+
+		@@media (min-width: 768px) {
+			.bd-placeholder-img-lg {
+				font-size: 3.5rem;
+			}
+		}*/
+
+
+
+	.container {
+		padding-left: 0;
+		width: 1400px !important;
+		max-width: none !important;
+		overflow: hidden; /*어긋난 정렬 수정*/
+	}
+
+	@@media (max-width: 300px) {
+		.container {
+			width: 300px !important;
+		}
+	}
+
+	/*카드 이미지 크기조절*/
+	.card-img-top {
+		height: 15rem;
+		/*object-fit: cover;*/
+		background-size: cover;
+	}
+
+	/*카드 버튼 위로*/
+	.card .btn {
+		z-index: 2;
+		position: relative;
+	}
+
+	.space {
+		width: 5px;
+		height: auto;
+		display: inline-block;
+	}
+</style>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+
+<div id="id" style="display:none">Swal.fire</div>
+@Html.Raw(TempData["TitleAlert"])
+
+@*<hr />*@
+<br />
+
+<div class="dropdown">
+	<button class="btn btn-outline-primary dropdown-toggle" type="button" data-toggle="dropdown" id="dropdownBtn">
+		@ViewData["SortName"]
+	</button>
+	<div class="dropdown-menu">
+		<a class="dropdown-item" href="@Url.Action("Title", "PreviewAlbum", new { sort = 1})">수정일 (오름차순)</a>
+		<a class="dropdown-item" href="@Url.Action("Title", "PreviewAlbum", new { sort = 2})">수정일 (내림차순)</a>
+		<a class="dropdown-item" href="@Url.Action("Title", "PreviewAlbum", new { sort = 3})">번호 (오름차순)</a>
+		<a class="dropdown-item" href="@Url.Action("Title", "PreviewAlbum", new { sort = 4})">번호 (내림차순)</a>
+	</div>
+
+	@if (isAdmin)
+	{
+		@*<button type="button" name="ProcessNumber" class="btn btn-md btn-lg col-2" style="float: right; color: white; background-color: lightseagreen;" value=1 onclick="location.href='VideoManager/Admin/AddTitle'">추가</button>*@
+		<button type="button" name="ProcessNumber" class="btn btn-md btn-lg col-2" style="float: right; color: white; background-color: lightseagreen;" value=1 onclick="location.href='@Url.Action("AddTitle","PreviewAdmin")'">추가</button>
+	}
+</div>
+
+&nbsp;
+
+<main>
+	<div class="album @*py-5*@">
+		<div class="container">
+
+			<div class="row row-cols-3 g-3">
+
+				@foreach (Video item in ViewBag.TitleList)
+				{
+					<div class="col">
+						<div class="card shadow-sm">
+							@*<svg class="bd-placeholder-img card-img-top" width="100%" height="225" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#55595c" /><text x="50%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text></svg>*@
+							@*<img class="card-img-top" src="~/SuperLarva.jpg" alt="Card image cap">*@
+							<img class="card-img-top" src=@item.ImageLink alt="Card image cap">
+							@*<a class="card-block stretched-link text-decoration-none" href="http://192.168.99.44:59683/Review/Comment"></a>*@
+@*							@if (isAdmin)
+							{
+								<a class="card-block stretched-link text-decoration-none" href=@("Episode?uid=" + item.UID + "&&sort=1")></a>
+							}
+							else
+							{
+								<a class="card-block stretched-link text-decoration-none" href=@("Episode?uid=" + item.UID + "&&sort=1")></a>								
+							}*@
+
+							<a class="card-block stretched-link text-decoration-none" href=@Url.Action("Episode","PreviewAlbum", new { uid = item.UID, sort = 1})></a>
+
+							<div class="card-body" href="#">
+								<div class="card-text">@("NO." + item.SortNumber)</div>
+								<div class="card-text">@item.Name</div>
+								<small class="text-muted">@item.Date</small>
+
+								@if (isAdmin)
+								{
+									<div class="d-flex justify-content-between align-items-center">
+										<div class="btn-group">
+											<form method="post" asp-controller="PreviewAdmin" asp-action="AddTitle">
+												<input type="hidden" name="titleName" value="@item.Name">
+												<input type="hidden" name="sortNumber" value=@item.SortNumber>
+												<input type="hidden" name="imagePath" value=@item.ImageLink>
+												<input type="hidden" name="processNumber" value=2>
+												<input type="hidden" name="uid" value=@item.UID>
+												<button type="submit" class="btn btn-sm btn-outline-secondary" @*onclick="location.href='/Admin/AddTitle'"*@>수정</button>
+											</form>
+
+											<div class="space">
+											</div>
+
+											<form method="post" asp-controller="PreviewAdmin" asp-action="DeleteTitle" onclick="return confirm('시즌을 삭제 하시겠습니까?')">
+												<input type="hidden" name="titleUid" value=@item.UID>
+												<button type="submit" class="btn btn-sm btn-outline-secondary">삭제</button>
+											</form>
+
+											@*											<button type="button" class="btn btn-sm btn-outline-secondary" onclick="location.href='/Admin/AddTitle'">수정</button>
+									<button type="button" class="btn btn-sm btn-outline-secondary">삭제</button>*@
+										</div>
+									</div>
+								}
+							</div>
+						</div>
+					</div>
+				}
+
+
+
+
+
+
+
+
+			</div>
+		</div>
+	</div>
+
+
+</main>

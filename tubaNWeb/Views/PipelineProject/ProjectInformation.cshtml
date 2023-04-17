@@ -1,0 +1,329 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+	//Layout = null;
+	ViewData["Title"] = "프로젝트 정보";
+
+	bool isAdmin = false;
+	if (Context.Session.GetString("UserId") != null)
+	{
+		string userId = Context.Session.GetString("UserId");
+		if (userId.ToLower().Equals("admin"))
+		{
+			isAdmin = true;
+		}
+	}
+}
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+	@*<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round">*@
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+@*	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">*@
+	<link rel="stylesheet" href="~/pipeline/css/table.css" asp-append-version="true" />
+	<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+
+	<style>
+		body {
+			color: #566787;
+			background: #f5f5f5;
+			/*font-family: 'Roboto', sans-serif;*/
+		}
+
+		.container-fluid {
+			/*width: 100%;*/
+			width: 1900px !important;
+			max-width: none !important;
+		}
+	</style>
+
+	<script>
+		function copyToClipboard(val) {
+			var t = document.createElement("textarea");
+			document.body.appendChild(t);
+			t.value = val;
+			t.select();
+			document.execCommand('copy');
+			document.body.removeChild(t);
+		}
+
+		// 모달창 자동으로 띄우기
+		@if ((string)TempData["ProjectModal"] == "1")
+		{
+			<text>
+				$(document).ready(function () {
+					$("#myModal1").modal("show");
+				});
+			</text>
+		}
+		else if ((string)TempData["ProjectModal"] == "2")
+		{
+			<text>
+				$(document).ready(function () {
+					$("#myModal2").modal("show");
+				});
+			</text>
+		}
+	</script>
+</head>
+
+
+
+
+
+<body>
+	<div id="id" style="display:none">Swal.fire</div>
+	@Html.Raw(TempData["Alert"])
+
+
+
+
+	<div class="menu">
+		<ul>
+			<li><a class="active" href="/PipelineProject/ProjectInformation">프로젝트 정보</a></li>
+			<li><a href="/PipelineAsset/AssetInformation">에셋 정보</a></li>
+			<li><a href="/PipelineLog/LogInformation">로그 정보</a></li>
+		</ul>
+	</div>
+
+
+
+	@*추가 모달창1*@
+	<div class="modal fade" id="myModal1" role="dialog" data-backdrop="static">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title">프로젝트 추가</h4>
+					<button type="button" class="close" data-dismiss="modal">×</button>
+				</div>
+				<form class="form" method="post" asp-controller="PipelineProject" asp-action="AddProject">
+					<div class="modal-body">
+						@*<p>시즌 추가</p>*@
+						<div class="form-group">
+							<label>프로젝트 이름 (예시 : 'Larva_Family')</label>
+							<input type="text" class="form-control" name="ProjectName" value="@TempData["AddModalProjectName"]" @*size=1000*@ @* placeholder="Enter email"*@>
+						</div>
+						<div class="form-group">
+							<label>네트워크 IP (예시 : '192.168.200.219')</label>
+							<input type="text" class="form-control" name="NetworkIp" value="@TempData["AddModalNetworkIp"]">
+						</div>
+						<div class="form-group">
+							<label>네트워크 폴더 (예시 : 'RND')</label>
+							<input type="text" class="form-control" name="NetworkFolder" value="@TempData["AddModalNetworkFolder"]">
+						</div>
+						<div class="form-group">
+							<label>에피소드 경로 (예시 : 'R:\PROJECT_TEST\05_ANIMATION\00_EPISODES')</label>
+							<input type="text" class="form-control" name="EpisodePath" value="@TempData["AddModalEpisodePath"]">
+						</div>
+						<div class="form-group">
+							<label>FBX 폴더 (예시 : '03_FBX')</label>
+							<input type="text" class="form-control" name="FbxFolder" value="@TempData["AddModalFbxFolder"]">
+						</div>
+						<div class="form-group">
+							<label>FPS (예시 : '30')</label>
+							<input type="text" class="form-control" name="FPS" value="@TempData["AddModalFPS"]">
+						</div>
+						@*&nbsp;*@
+						@*<input type="hidden" name="processNumber" value=1>*@
+					</div>
+					<div class="modal-footer">
+						@*<p>팝업 footer</p>*@
+						<input type="submit" class="btn btn-success" value="추가" onclick="return confirm('프로젝트를 추가 하시겠습니까?')">
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	@*수정 모달창*@
+	<div class="modal fade" id="myModal2" role="dialog" data-backdrop="static">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title">프로젝트 수정</h4>
+					<button type="button" class="close" data-dismiss="modal">×</button>
+				</div>
+				<form class="form" method="post" asp-controller="PipelineProject" asp-action="UpdateProject">
+					<div class="modal-body">
+						<div class="form-group">
+							<label>프로젝트 이름 (예시 : 'Larva_Family')</label>
+							<input type="text" class="form-control" name="ProjectName" value="@TempData["UpdateModalProjectName"]">
+						</div>
+						<div class="form-group">
+							<label>네트워크 IP (예시 : '192.168.200.219')</label>
+							<input type="text" class="form-control" name="NetworkIp" value="@TempData["UpdateModalNetworkIp"]">
+						</div>
+						<div class="form-group">
+							<label>네트워크 폴더 (예시 : 'RND')</label>
+							<input type="text" class="form-control" name="NetworkFolder" value="@TempData["UpdateModalNetworkFolder"]">
+						</div>
+						<div class="form-group">
+							<label>에피소드 경로 (예시 : 'R:\PROJECT_TEST\05_ANIMATION\00_EPISODES')</label>
+							<input type="text" class="form-control" name="EpisodePath" value="@TempData["UpdateModalEpisodePath"]">
+						</div>
+						<div class="form-group">
+							<label>FBX 폴더 (예시 : '03_FBX')</label>
+							<input type="text" class="form-control" name="FbxFolder" value="@TempData["UpdateModalFbxFolder"]">
+						</div>
+						<div class="form-group">
+							<label>FPS (예시 : '30')</label>
+							<input type="text" class="form-control" name="FPS" value="@TempData["UpdateModalFPS"]">
+						</div>
+					</div>
+					<input type="hidden" name="oldProjectName" value="@TempData["UpdateModalOldProjectName"]">
+					<div class="modal-footer">
+						<input type="submit" class="btn btn-success" value="수정" onclick="return confirm('프로젝트를 수정 하시겠습니까?')">
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<div class="container-fluid">
+
+		@*<a data-toggle="modal" data-target="#myModal">모달 창 띄우기</a>*@
+		@if (isAdmin)
+		{
+			@*<button class="btn btn-success float-right" data-toggle="modal" data-target="#myModal1" style="margin-top: 10px">추가</button>*@
+			@*<br />*@
+			<div class="jumbotron"@* style="margin-top: 34px"*@>
+				<h1 class="text-center">프로젝트 정보</h1>
+			</div>
+			<button class="btn btn-success float-right" data-toggle="modal" data-target="#myModal1" style="margin-top: 10px">추가</button>
+		}
+		else
+		{
+			<div class="jumbotron">
+				<h1 class="text-center">프로젝트 정보</h1>
+			</div>
+		}
+	</div>
+
+	<br/>
+
+	<div class="container-fluid">
+
+		<div class="table-responsive">
+			<div class="table-wrapper">
+				<div class="table-title">
+					<div class="row">
+						<div class="col-sm-6"><h2><b>프로젝트 정보</b></h2></div>
+						@*<div class="col-sm-6">
+						<div class="btn-group" data-toggle="buttons">
+						<label class="btn btn-info active">
+						<input type="radio" name="status" value="all" checked="checked"> All
+						</label>
+						<label class="btn btn-success">
+						<input type="radio" name="status" value="active"> Success
+						</label>
+						<label class="btn btn-danger">
+						<input type="radio" name="status" value="inactive"> Fail
+						</label>
+						<label class="btn btn-danger">
+						<input type="radio" name="status" value="expired"> Expired
+						</label>
+						</div>
+						</div>*@
+					</div>
+				</div>
+
+				<table class="table table-striped table-hover table-bordered">
+					<thead>
+						<tr>
+							<th>프로젝트 이름</th>
+							<th>네트워크 IP</th>
+							<th>네트워크 폴더</th>
+							<th>에피소드 경로</th>
+							<th>FBX 폴더</th>
+							<th>FPS</th>
+							@if (isAdmin)
+							{
+								<th></th>
+							}
+						</tr>
+					</thead>
+
+
+
+					<tbody>
+						@foreach (var item in ViewBag.projectDataList)
+						{
+							<tr>
+								<td>@item.ProjectName</td>
+								<td>@item.NetworkIp</td>
+								<td>@item.NetworkFolder</td>
+								<td>@item.EpisodePath</td>
+								<td>@item.FbxFolder</td>
+								<td>@item.FPS</td>
+								@if (isAdmin)
+								{
+									<td>
+											<button class="btn btn-sm btn-outline-secondary" onclick="location.href='@("/PipelineProject/ModalUpdateProjectInfo?projectName=" + item.ProjectName)'" @*data-toggle="modal" data-target="#myModal2"*@>수정</button>
+											<button class="btn btn-sm btn-outline-secondary" onclick="DeleteConfirm('@item.ProjectName');">삭제</button>
+									</td>
+								}
+							</tr>
+						}
+					</tbody>
+
+
+
+				</table>
+			</div>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		let deleteConfirm = function (tableName) {
+			Swal.fire({
+				icon: 'warning',
+				title: '경고',
+				html: '해당 데이터가 모두 삭제 됩니다.<br>정말로 진행 하시겠습니까?',
+				//allowOutsideClick: false,
+				showDenyButton: true,
+				showCancelButton: true,
+				confirmButtonText: 'OK',
+				cancelButtonText: 'Cancel',
+				customClass: {
+					actions: 'my-actions',
+					cancelButton: 'order-1 right-gap',
+					confirmButton: 'order-2',
+					denyButton: 'order-3',
+				}
+			}).then((result) => {
+				if (result.isConfirmed) {
+					//Swal.fire(tableName, '', 'success1')
+					location.href = '/PipelineProject/DeleteProject?projectName=' + tableName;
+				} else if (result.isDenied) {
+				}
+			})
+		}
+
+		function DeleteConfirm(tableName) {
+			deleteConfirm(tableName);
+		}
+	</script>
+</body>
+</html>

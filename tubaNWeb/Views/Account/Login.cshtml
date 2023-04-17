@@ -1,0 +1,199 @@
+﻿@model tubaNWeb.Models.Preview.User;
+
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+	Layout = null;
+	ViewData["Title"] = "로그인";
+
+	string[] checkProcess = new string[2];
+
+	int curProcessNumber = (int)ViewData["CurProcessNumber"];
+	if (curProcessNumber == 1)
+	{
+		checkProcess[0] = "checked";
+	}
+	else
+	{
+		checkProcess[1] = "checked";
+	}
+}
+
+
+
+<title>@ViewData["Title"]</title>
+<link rel="stylesheet" href="~/preview/css/login.css" type="text/css" />
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+<style>
+	.container {
+	width: 1400px !important;
+	max-width: none !important;
+	}
+
+	@@media (max-width: 300px) {
+	.container {
+	width: 300px !important;
+	}
+	}
+
+	.label {
+	color: white !important;
+	}
+
+	input::-webkit-input-placeholder {
+	color: darkgray;
+	}
+
+	input:-ms-input-placeholder {
+	color: darkgray;
+	}
+
+	textarea::-webkit-input-placeholder {
+	color: darkgray;
+	}
+
+	textarea:-ms-input-placeholder {
+	color: darkgray;
+	}
+
+	.swal2-popup {
+	font-size: 1.6rem !important;
+	/*		font-family: Georgia, serif;*/
+	}
+	}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script> @*자리옮기면 동작안함*@
+
+
+
+
+
+
+@*<script>
+	@if (access == 0)
+	{
+		<text>
+	function getIP(json) {
+		//document.write("My public IP address is: ", json.ip);
+
+		$.ajax({
+			type: "POST",
+			url: "@Url.Action("CheckIp")",
+			data: { publicIp: json.ip },
+			dataType: "text",
+			success: function (msg) {
+				//console.log(msg);
+			},
+			error: function (req, status, error) {
+				console.log(msg);
+			}
+		});
+	}
+				</text>
+		}
+</script>*@
+
+
+
+
+
+
+
+<div id="id" style="display:none">Swal.fire</div>
+@Html.Raw(ViewData["NoticeAlert"])
+@Html.Raw(ViewData["Alert"])
+
+
+
+
+<div class="login-wrap">
+	<div class="login-html">
+		<input id="tab-1" type="radio" name="tab" class="sign-in" @checkProcess[0]><label for="tab-1" class="tab">로그인</label>
+		<input id="tab-2" type="radio" name="tab" class="for-pwd" @checkProcess[1]><label for="tab-2" class="tab">비밀번호 변경</label>
+
+		<div class="login-form">
+			<div class="sign-in-htm">
+				<form id="login-form" class="form" method="post" asp-controller="Account" asp-action="Login">
+					&nbsp;
+
+					<div class="group">
+						@*<label for="user" class="label">Username or Email</label>*@
+						<input type="text" asp-for="UserId" id="userid" name="userid" class="input" value=@ViewData["LoginID"] placeholder="아이디">
+						@if (curProcessNumber == 1)
+						{
+							<span class="text-danger" asp-validation-for="UserId"></span>
+						}
+					</div>
+
+					&nbsp;
+
+					<div class="group">
+						@*<label for="pass" class="label">Password</label>*@
+						<input type="password" asp-for="Password" id="password" name="password" class="input" value=@ViewData["LoginPassword"] data-type="password" placeholder="비밀번호">
+						@if (curProcessNumber == 1)
+						{
+							<span class="text-danger" asp-validation-for="Password"></span>
+						}
+					</div>
+
+					&nbsp;
+
+					<input type="hidden" asp-for="ProcessNumber" id="processNumber" name="processNumber" value=1>
+					<input type="hidden" asp-for="NewPassword" id="newPassword" name="newPassword" value=0>
+					<input type="hidden" asp-for="CheckNewPassword" id="checkNewPassword" name="checkNewPassword" value=0>
+
+					<div class="group">
+						<input type="submit" class="button" value="로그인">
+					</div>
+
+					<div class="hr"></div>
+				</form>
+			</div>
+
+
+
+			<div class="for-pwd-htm">
+				<form id="change-form" class="form" method="post" asp-controller="Account" asp-action="Login">
+					<div class="group">
+						<label for="user" class="label">아이디</label>
+						<input type="text" asp-for="UserId" id="changeUserid" name="userid" class="input" value=@ViewData["LoginID"]>
+					</div>
+
+					<div class="group">
+						<label for="user" class="label">현재 비밀번호</label>
+						<input type="password" asp-for="Password" id="changePassword" name="password" class="input" value=@ViewData["LoginPassword"]>
+					</div>
+
+					<div class="group">
+						<label for="user" class="label">새 비밀번호</label>
+						<input type="password" asp-for="NewPassword" id="newPassword" name="newPassword" class="input">
+					</div>
+
+					<div class="group">
+						<label for="user" class="label">비밀번호 확인</label>
+						<input type="password" asp-for="CheckNewPassword" id="checkNewPassword" name="checkNewPassword" class="input">
+					</div>
+
+					&nbsp;
+
+					<input type="hidden" asp-for="ProcessNumber" id="processNumber" name="processNumber" value=2>
+
+					<div class="group">
+						<input type="submit" class="button" value="변경">
+					</div>
+
+					<div class="hr"></div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>

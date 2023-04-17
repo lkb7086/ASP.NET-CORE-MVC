@@ -1,0 +1,167 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    Layout = null;
+    ViewData["Title"] = "에피소드 추가";
+
+    uint titleUid = (uint)Context.Session.GetInt32("CurTitle");
+
+    string[,] selectedWhatwork = new string[3, 3];
+    if (TempData["EpisodeModify"] != null && TempData["EpisodeModify"].Equals("Modify"))
+    {
+        int[] whatwork = new int[3];
+        whatwork[0] = int.Parse(TempData["Whatwork1"].ToString());
+        whatwork[1] = int.Parse(TempData["Whatwork2"].ToString());
+        whatwork[2] = int.Parse(TempData["Whatwork3"].ToString());
+        const string selected = "selected";
+
+        for (int i = 0; i < whatwork.Length; i++)
+        {
+            switch (whatwork[i])
+            {
+				case 0:
+                    selectedWhatwork[i, 0] = selected;
+					break;
+				case 1:
+                    selectedWhatwork[i, 1] = selected;
+					break;
+				case 2:
+                    selectedWhatwork[i, 2] = selected;
+					break;
+				default:
+                    break;
+            }
+        }
+    }
+
+}
+
+
+
+<title>@ViewData["Title"]</title>
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+<style>
+	.container {
+/*		padding-left: 0;*/
+		width: 700px !important;
+		max-width: none !important;
+	}
+
+	@@media (max-width: 300px) {
+		.container {
+			width: 300px !important;
+		}
+	}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+
+<div id="id" style="display:none">Swal.fire</div>
+@Html.Raw(TempData["AddEpisodeAlert"])
+
+&nbsp;
+
+@*<div class="d-flex justify-content-center">*@
+<div class="container">
+
+
+    <form class="form" method="post" asp-controller="PreviewAdmin" asp-action="AddEpisode">
+        @if (TempData["EpisodeModify"] != null && TempData["EpisodeModify"].Equals("Modify"))
+        {
+            <p style="text-align:center; font-size:30px; font-weight: 900;">에피소드 수정</p>
+        }
+        else
+        {
+            <p style="text-align:center; font-size:30px; font-weight: 900;">에피소드 추가</p>
+        }
+
+        <div class="form-group">
+            <label>에피소드 이름 (예시 : 'EP.01 - Yellow and Red')</label>
+            <input type="text" class="form-control" name="EpisodeName" value="@TempData["EpisodeName"]" size=60 @* placeholder="Enter email"*@>
+        </div>
+        &nbsp;
+        <div class="form-group">
+            <label>에피소드 번호 (예시 : '1')</label>
+            <input type="text" class="form-control" name="SortNumber" value="@TempData["SortNumber"]">
+        </div>
+		&nbsp;
+
+		<div class="form-group">
+			<label>진행 상황 (순서 : 애니메틱, 애니메이션, 파이널)</label>
+		</div>
+
+        <div class="form-group">
+            
+            <select name="Whatwork1">
+                <!option value="0" @selectedWhatwork[0, 0]>대기</!option>
+                <!option value="1" @selectedWhatwork[0, 1]>진행중</!option>
+                <!option value="2" @selectedWhatwork[0, 2]>완료</!option>
+            </select>
+
+            <select name="Whatwork2">
+                <!option value="0" @selectedWhatwork[1, 0]>대기</!option>
+                <!option value="1" @selectedWhatwork[1, 1]>진행중</!option>
+                <!option value="2" @selectedWhatwork[1, 2]>완료</!option>
+			</select>
+
+            <select name="Whatwork3">
+                <!option value="0" @selectedWhatwork[2, 0]>대기</!option>
+                <!option value="1" @selectedWhatwork[2, 1]>진행중</!option>
+                <!option value="2" @selectedWhatwork[2, 2]>완료</!option>
+            </select>
+        </div>
+
+
+
+
+
+
+
+        &nbsp;
+        <div class="form-group">
+            <label>이미지 경로 (예시 : 'LarvaFamily/EP_01/episode.jpg')</label>
+            <input type="text" class="form-control" name="ImagePath" value="@TempData["ImagePath"]">
+        </div>
+        &nbsp;
+        <div class="form-group">
+            <label>애니메틱 경로 (예시 : 'LarvaFamily/EP_01/amt.mp4')</label>
+            <input type="text" class="form-control" name="AnimeticPath" value="@TempData["AnimeticPath"]">
+        </div>
+		&nbsp;
+		<div class="form-group">
+            <label>애니메이션 경로 (예시 : 'LarvaFamily/EP_01/ani.mp4')</label>
+            <input type="text" class="form-control" name="AnimationPath" value="@TempData["AnimationPath"]">
+		</div>
+		&nbsp;
+        <div class="form-group">
+            <label>파이널 경로 (예시 : 'LarvaFamily/EP_01/final.mp4')</label>
+            <input type="text" class="form-control" name="FinalPath" value="@TempData["FinalPath"]">
+        </div>
+        &nbsp;
+
+
+
+
+        <input type="hidden" name="processNumber" value=1>
+
+		@if (TempData["EpisodeModify"] != null && TempData["EpisodeModify"].Equals("Modify"))
+		{
+			<input type="hidden" name="Uid" value=@TempData["Uid"]>
+            <div class="group" style=" text-align: center;">
+                <input type="submit" class="btn btn-sm btn-outline-secondary" value="수정" onclick="return confirm('에피소드를 수정 하시겠습니까?')">
+                <input type="button" class="btn btn-sm btn-outline-secondary" onclick="location.href='@Url.Action("Episode", "PreviewAlbum", new {uid = titleUid, sort = 1} )'" value="취소">
+			</div>
+		}
+		else
+		{
+			<input type="hidden" name="Uid" value=0xFFFFFFFF>
+            <div class="group" style=" text-align: center;">
+                <input type="submit" class="btn btn-sm btn-outline-secondary" value="추가" onclick="return confirm('에피소드를 추가 하시겠습니까?')">
+                <input type="button" class="btn btn-sm btn-outline-secondary" onclick="location.href='@Url.Action("Episode", "PreviewAlbum", new {uid = titleUid, sort = 1} )'" value="취소">
+			</div>
+        }
+    </form>
+
+
+</div>

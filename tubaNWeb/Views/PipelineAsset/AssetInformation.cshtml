@@ -1,0 +1,590 @@
+﻿@using tubaNWeb.Models.Pipeline;
+@model tubaNWeb.Models.Pipeline.FileListParameter
+
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+@{
+	//Layout = "_LayoutPreview";
+	ViewData["Title"] = "에셋 정보";
+
+	const string epString = "EP";
+	const string sString = "S";
+	const string cString = "C";
+
+	List<string> episodeList = ViewBag.episodeList;
+	Dictionary<string, Dictionary<string, List<string>>> treeDict = ViewBag.treeDict;
+
+	FileListParameter fileListParameter = (FileListParameter)ViewData["FileListParameter"];
+	int maxPage = (int)ViewData["MaxPage"];
+	int startPage = 1;
+	string TableName = string.Empty;
+	foreach (var item in ViewBag.tableList)
+	{
+		if (item.IsSelected)
+		{
+			TableName = item.TableName;
+			break;
+		}
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+@*
+<table class="table table-bordered">
+    <thead>
+        <tr>
+			<th>idx</th>
+			<th>episodeNum</th>
+			<th>sceneNum</th>
+			<th>cutNum</th>
+			<th>dirPath</th>
+			<th>fileName</th>
+			<th>polygonType</th>
+			<th>assetType</th>
+			<th>dataType</th>
+			<th>assetVer</th>
+			<th>frameAddVal</th>
+			<th>applyState</th>
+        </tr>
+    </thead>
+
+	<tbody>
+		@foreach (FileData item in Model)
+		{
+			<tr>
+				<td>@item.Idx</td>
+				<td>@item.EpisodeNum</td>
+				<td>@item.SceneNum</td>
+				<td>@item.CutNum</td>
+				<td>@item.DirPath</td>
+				<td>@item.FileName</td>
+				<td>@item.PolygonType</td>
+				<td>@item.AssetType</td>
+				<td>@item.DataType</td>
+				<td>@item.AssetVer</td>
+				<td>@item.FrameAddVal</td>
+				<td>@item.ApplyState</td>
+			</tr>
+		}
+    </tbody>
+</table>
+*@
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+	@*<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round">*@
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+	@*	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">*@
+	<link rel="stylesheet" href="~/pipeline/css/table.css" asp-append-version="true" />
+	<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+
+	<style>
+		body {
+			color: #566787;
+			background: #f5f5f5;
+			/*font-family: 'Roboto', sans-serif;*/
+		}
+
+		.container-fluid {
+			/*width: 100%;*/
+			width: 1900px !important;
+			max-width: none !important;
+		}
+
+
+
+
+
+
+		.treebuttons {
+			/*position: absolute;*/
+			top: 10px;
+			right: 10px;
+		}
+
+		/*		.formbuttons {
+							position: absolute;
+							top: 10px;
+							right: 10px;
+						}
+
+						.threesteps {
+							float: left;
+							padding: 10px;
+							width: 50%;
+						}*/
+
+
+
+
+
+
+		.tree,
+		.tree ul {
+			list-style: none;
+		}
+
+			.tree .node {
+				cursor: pointer;
+				display: inline-block;
+				margin: 1.5px;
+			}
+
+				.tree .node:before {
+					content: "\25B6";
+					color: black;
+					display: inline-block;
+					margin-right: 6px;
+					transition: transform 100ms;
+				}
+
+				.tree .node.leaf:before {
+					content: "\25A2";
+				}
+
+			.tree input[type="checkbox"] {
+				display: none;
+			}
+
+				.tree input[type="checkbox"]:not(:checked) ~ .node:not(.leaf):before {
+					transform: rotate(90deg);
+					transition: transform 100ms;
+				}
+
+				.tree input[type="checkbox"]:checked ~ ul {
+					display: none;
+				}
+	</style>
+
+	<style>
+		.table-btn {
+			background-color: rgb(0, 50, 74);
+			color: #fff;
+		}
+
+			.table-btn:hover {
+				background-color: lightgrey;
+				transition: 0.7s;
+			}
+	</style>
+
+	<script>
+		//테이블 필터
+		$(document).ready(function () {
+			$(".btn-group .btn").click(function () {
+				var inputValue = $(this).find("input").val();
+				if (inputValue != 'all') {
+					var target = $('table tr[data-status="' + inputValue + '"]');
+					$("table tbody tr").not(target).hide();
+					target.fadeIn();
+				} else {
+					$("table tbody tr").fadeIn();
+				}
+			});
+			// Changing the class of status label to support Bootstrap 4
+			var bs = $.fn.tooltip.Constructor.VERSION;
+			var str = bs.split(".");
+			if (str[0] == 4) {
+				$(".label").each(function () {
+					var classStr = $(this).attr("class");
+					var newClassStr = classStr.replace(/label/g, "badge");
+					$(this).removeAttr("class").addClass(newClassStr);
+				});
+			}
+		});
+
+		//트리뷰 버튼
+		function openAll() {
+			const checkboxes = document.querySelectorAll('.tree input[type=checkbox]');
+			checkboxes.forEach((box) => {
+				box.checked = false;
+			});
+		}
+
+		function closeAll() {
+			const checkboxes = document.querySelectorAll('.tree input[type=checkbox]');
+			checkboxes.forEach((box) => {
+				box.checked = true;
+			});
+		}
+
+		//window.onload = function () {
+		//	const checkboxes = document.querySelectorAll('.tree input[type=checkbox]');
+		//	checkboxes.forEach((box) => {
+		//		box.checked = true;
+		//	});
+		//}
+
+		// 클립보드 복사
+		function copyToClipboard(val) {
+			var t = document.createElement("textarea");
+			document.body.appendChild(t);
+			t.value = val;
+			t.select();
+			document.execCommand('copy');
+			document.body.removeChild(t);
+		}
+	</script>
+</head>
+
+
+
+
+
+<body>
+	<div id="id" style="display:none">Swal.fire</div>
+	@Html.Raw(TempData["Alert"])
+
+
+
+
+	<div class="menu">
+		<ul>
+			<li><a href="/PipelineProject/ProjectInformation">프로젝트 정보</a></li>
+			<li><a class="active" href="/PipelineAsset/AssetInformation">에셋 정보</a></li>
+			<li><a href="/PipelineLog/LogInformation">로그 정보</a></li>
+		</ul>
+	</div>
+
+
+
+
+	@*	<nav class="navbar  navbar-expand-sm fixed-top bg-dark  navbar-dark">
+	<ul class="navbar-nav">
+	<li class="nav-item">
+	<a class="navbar-brand" href="#">
+	<img src="~/data/image/Toba.jpg" alt="Logo" style="width: 100px; padding-left: 10px;" />
+	</a>
+	</li>
+	<li class="nav-item active">
+	<a class="nav-link text-warning" href="/Pipeline">파이프라인</a>
+	</li>
+	<li class="nav-item">
+	<a class="nav-link" href="/Unreal">언리얼</a>
+	</li>
+	</ul>
+	</nav>*@
+
+
+
+
+
+	<section @*style="position: absolute; left: 200px;"*@>
+		<div class="container-fluid">
+			<div class="jumbotron">
+				<h1 class="text-center">에셋 정보</h1>
+				<div class="float-left" style="margin-left: -32px; margin-top: 25px">
+					<div class="btn-group btn-group-toggle" data-toggle="buttons">
+						@foreach (var item in ViewBag.tableList)
+						{
+							@if (item.IsSelected)
+							{
+								<label class="btn table-btn" onClick="window.location = '@Url.Action("AssetInformation","PipelineAsset", new {TableName = item.TableName})';" style="background-color: silver">
+									<input type="radio" name="options" id="option1" autocomplete="off">@item.TableName
+								</label>
+							}
+							else
+							{
+								<label class="btn table-btn" onClick="window.location = '@Url.Action("AssetInformation","PipelineAsset", new {TableName = item.TableName})';">
+									<input type="radio" name="options" id="option1" autocomplete="off">@item.TableName
+								</label>
+							}
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+
+		<div class="container-fluid">
+			<div>
+				<div class="treebuttons">
+					<button class="btn btn-success" onclick="openAll()">모두 열기</button>
+					<button class="btn btn-success" onclick="closeAll()">모두 닫기</button>
+				</div>
+
+				<div>
+					<ul class="tree">
+						@for (int i = 0; i < episodeList.Count; i++)
+						{
+							<li style="margin-left:-43px;">
+								@if (!(bool)ViewData["SceneEmpty"] && fileListParameter.Episode == episodeList[i])
+								{
+									<input type="checkbox" id="@("node" + i)">
+								}
+								else
+								{
+									<input checked type="checkbox" id="@("node" + i)">
+								}
+								<label for="@("node" + i)" class="node"><a href=@("/PipelineAsset/AssetInformation?SearchType=1&&Episode=" + episodeList[i] + "&&TableName=" + fileListParameter.TableName)>@(epString + episodeList[i])</a></label>
+								<ul>
+									@for (int j = 0; j < treeDict[episodeList[i]].Count; j++)
+									{
+										<li>
+											@{
+												List<string> keys = new List<string>(treeDict[episodeList[i]].Keys);
+												@if (fileListParameter.Episode == episodeList[i] && fileListParameter.Scene == keys[j])
+												{
+													<input type="checkbox" id="@("node" + i + j)">
+												}
+												else
+												{
+													<input checked type="checkbox" id="@("node" + i + j)">
+												}
+												<label for="@("node" + i + j)" class="node"><a href=@("/PipelineAsset/AssetInformation?SearchType=2&&Episode=" + episodeList[i] + "&&Scene=" + keys[j] + "&&TableName=" + fileListParameter.TableName)>@(sString + keys[j])</a></label>
+												<ul>
+													@for (int k = 0; k < treeDict[episodeList[i]][keys[j]].Count; k++)
+													{
+														<li>
+															<input type="checkbox" id="@("node" + i + j + k)">
+															<label for="@("node" + i + j + k)" class="node leaf"><a href=@("/PipelineAsset/AssetInformation?SearchType=3&&Episode=" + episodeList[i] + "&&Scene=" + keys[j] + "&&Cut=" + treeDict[episodeList[i]][keys[j]][k] + "&&TableName=" + fileListParameter.TableName)>@(cString + treeDict[episodeList[i]][keys[j]][k])</a></label>
+														</li>
+													}
+												</ul>
+											}
+										</li>
+									}
+								</ul>
+							</li>
+						}
+					</ul>
+				</div>
+
+				<hr>
+				<form class="form" method="get" asp-controller="Unreal" asp-action="Get">
+					<input type="hidden" name="num" value=348628919>
+					<input type="hidden" name="tableName" value=@TableName>
+					<input class="btn btn-success col-xs-1 float-right" type="submit" value="전체 갱신" @*formaction="/Unreal/AllUpdate"*@ />
+				</form>
+				<br />
+				<br />
+				<form class="form" method="get">
+					<div class="row float-right" style="margin-right: -210px;">
+						<select class="form-control col-xs-1" @*asp-items="@ViewBag.searchFilterList"*@ name="searchFilter" style="width:auto;">
+							@if ((int)ViewData["SelectedSearchFilter"] == 1)
+							{
+								<option value="fileName" selected>fileName</option>
+								<option value="assetType">assetType</option>
+							}
+							else if ((int)ViewData["SelectedSearchFilter"] == 2)
+							{
+								<option value="fileName">fileName</option>
+								<option value="assetType" selected>assetType</option>
+							}
+						</select>
+						<input type="hidden" asp-for="SearchType" value=4>
+						<input type="hidden" asp-for="TableName" value=@fileListParameter.TableName>
+						&nbsp;
+						<input type="text" class="form-control col-8" placeholder="검색" asp-for="SearchString" value="@ViewData["SearchString"]" style="width:1000px;">
+						&nbsp;
+						<input class="btn btn-info col-xs-1" type="submit" value="검색" formaction="/PipelineAsset/AssetInformation" />
+					</div>
+				</form>
+			</div>
+
+			<br />
+
+			<div class="table-responsive">
+				<div class="table-wrapper">
+					<div class="table-title">
+						<div class="row">
+							<div class="col-sm-6"><h2><b>@TableName</b></h2></div>
+							<div class="col-sm-6">
+								<div class="btn-group" data-toggle="buttons">
+									<label class="btn btn-info active">
+										<input type="radio" name="status" value="all" checked="checked"> All
+									</label>
+									<label class="btn btn-success">
+										<input type="radio" name="status" value="active"> Success
+									</label>
+									<label class="btn btn-danger">
+										<input type="radio" name="status" value="inactive"> Fail
+									</label>
+									@*								<label class="btn btn-danger">
+									<input type="radio" name="status" value="expired"> Expired
+									</label>*@
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<table class="table table-striped table-hover table-bordered">
+						<thead>
+							<tr>
+								<th>idx</th>
+								<th>episodeNum</th>
+								<th>sceneNum</th>
+								<th>cutNum</th>
+								<th>dirPath</th>
+								<th>fileName</th>
+								<th>polygonType</th>
+								<th>assetType</th>
+								<th>dataType</th>
+								<th>assetVer</th>
+								<th>frameAddVal</th>
+								<th>applyState</th>
+							</tr>
+						</thead>
+
+
+
+						<tbody>
+							@foreach (var item in ViewBag.fileDataList)
+							{
+								<tr data-status="@item.Active">
+									<td>@item.Idx</td>
+									<td>@item.EpisodeNum</td>
+									<td>@item.SceneNum</td>
+									<td>@item.CutNum</td>
+									<td><button class="btn btn-sm manage" title="@item.DirPath" onclick="copyToClipboard('@item.DirPath.Replace("\\", "\\\\")')">Copy</button></td>
+									<td><span style="color:seagreen">@item.FileName</span></td>
+									@if (item.PolygonType.Equals("HIGH"))
+									{
+										<td><span class="label" style="background-color: darkorange;">@item.PolygonType</span></td>
+									}
+									else
+									{
+										<td><span class="label label-warning">@item.PolygonType</span></td>
+									}
+									<td>@item.AssetType</td>
+									<td>@item.DataType</td>
+									<td>@item.AssetVer</td>
+									<td>@item.FrameAddVal</td>
+									<td>@item.ApplyState</td>
+								</tr>
+							}
+
+							@*<tr data-status="active">
+							<td>1</td>
+							<td><a href="#">loremvallis.com</a></td>
+							<td>04/10/2013</td>
+							<td><span class="label label-success">Active</span></td>
+							<td>Buenos Aires</td>
+							<td><a href="#" class="btn btn-sm manage">Manage</a></td>
+							</tr>
+							<tr data-status="inactive">
+							<td>2</td>
+							<td><a href="#">quisquamut.net</a></td>
+							<td>05/08/2014</td>
+							<td><span class="label label-warning">Inactive</span></td>
+							<td>Australia</td>
+							<td><a href="#" class="btn btn-sm manage">Manage</a></td>
+							</tr>
+							<tr data-status="active">
+							<td>3</td>
+							<td><a href="#">convallissed.com</a></td>
+							<td>11/05/2015</td>
+							<td><span class="label label-success">Active</span></td>
+							<td>United Kingdom</td>
+							<td><a href="#" class="btn btn-sm manage">Manage</a></td>
+							</tr>
+							<tr data-status="expired">
+							<td>4</td>
+							<td><a href="#">phasellusri.org</a></td>
+							<td>06/09/2016</td>
+							<td><span class="label label-danger">Expired</span></td>
+							<td>Romania</td>
+							<td><a href="#" class="btn btn-sm manage">Manage</a></td>
+							</tr>
+							<tr data-status="inactive">
+							<td>5</td>
+							<td><a href="#">facilisleo.com</a></td>
+							<td>12/08/2017</td>
+							<td><span class="label label-warning">Inactive</span></td>
+							<td>Germany</td>
+							<td><a href="#" class="btn btn-sm manage">Manage</a></td>
+							</tr>*@
+						</tbody>
+
+
+
+					</table>
+
+					<hr />
+
+					@if (fileListParameter.SearchType == 0)
+					{
+						<nav aria-label="...">
+							<ul class="pagination">
+								@if (fileListParameter.Page == 1)
+								{
+									<li class="page-item disabled"><a class="page-link">이전</a></li>
+								}
+								else
+								{
+									<li class="page-item"><a class="page-link" href="@("/PipelineAsset/FileList?Page=" + (fileListParameter.Page - 1))">이전</a></li>
+								}
+
+								@for (int i = 0; i < maxPage; i++)
+								{
+									if (fileListParameter.Page == i + 1)
+									{
+										<li class="page-item active"><span class="page-link">@(startPage + i)<span class="sr-only">(current)</span></span></li>
+									}
+									else
+									{
+										<li class="page-item"><a class="page-link" href="@("/PipelineAsset/FileList?Page=" + (startPage + i))">@(startPage + i)</a></li>
+									}
+								}
+
+								@if (fileListParameter.Page < maxPage)
+								{
+									<li class="page-item"><a class="page-link" href="@("/PipelineAsset/FileList?Page=" + (fileListParameter.Page + 1))">다음</a></li>
+								}
+								else
+								{
+									<li class="page-item disabled"><a class="page-link">다음</a></li>
+								}
+							</ul>
+						</nav>
+					}
+
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<script>
+		//var saveBtn = document.querySelector("#save-submit");
+		//saveBtn.addEventListener("click", function (e) {
+		//	this.setAttribute("disabled", "disabled");
+		//});
+		//var saveSubmits = document.querySelectorAll(".save-submit");
+		//for (i = 0; i < saveSubmits.length; i++) {
+		//	saveSubmits[i].addEventListener("click", function (e) {
+		//	this.setAttribute("disabled", "disabled");
+		//}
+	</script>
+</body>
+</html>

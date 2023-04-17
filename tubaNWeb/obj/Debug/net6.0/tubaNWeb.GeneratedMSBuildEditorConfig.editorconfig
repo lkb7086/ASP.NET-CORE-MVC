@@ -1,0 +1,89 @@
+is_global = true
+build_property.TargetFramework = net6.0
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = true
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = 
+build_property.PlatformNeutralAssembly = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property._SupportedPlatformList = Linux,macOS,Windows
+build_property.RootNamespace = tubaNWeb
+build_property.RootNamespace = tubaNWeb
+build_property.ProjectDir = C:\Users\tubaN\Desktop\tubaNWeb\
+build_property.RazorLangVersion = 6.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = C:\Users\tubaN\Desktop\tubaNWeb
+build_property._RazorSourceGeneratorDebug = 
+
+[C:/Users/tubaN/Desktop/tubaNWeb/Views/Account/Login.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxMb2dpbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/tubaN/Desktop/tubaNWeb/Views/Home/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/tubaN/Desktop/tubaNWeb/Views/Home/Privacy.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/tubaN/Desktop/tubaNWeb/Views/PipelineAsset/AssetInformation.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGlwZWxpbmVBc3NldFxBc3NldEluZm9ybWF0aW9uLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/tubaN/Desktop/tubaNWeb/Views/PipelineLog/LogInformation.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGlwZWxpbmVMb2dcTG9nSW5mb3JtYXRpb24uY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/tubaN/Desktop/tubaNWeb/Views/PipelineProject/ProjectInformation.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGlwZWxpbmVQcm9qZWN0XFByb2plY3RJbmZvcm1hdGlvbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/tubaN/Desktop/tubaNWeb/Views/PreviewAdmin/AddEpisode.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJldmlld0FkbWluXEFkZEVwaXNvZGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/tubaN/Desktop/tubaNWeb/Views/PreviewAdmin/AddTitle.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJldmlld0FkbWluXEFkZFRpdGxlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/tubaN/Desktop/tubaNWeb/Views/PreviewAlbum/Episode.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJldmlld0FsYnVtXEVwaXNvZGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/tubaN/Desktop/tubaNWeb/Views/PreviewAlbum/Title.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJldmlld0FsYnVtXFRpdGxlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/tubaN/Desktop/tubaNWeb/Views/PreviewReview/Comment.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJldmlld1Jldmlld1xDb21tZW50LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/tubaN/Desktop/tubaNWeb/Views/Shared/Error.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/tubaN/Desktop/tubaNWeb/Views/Shared/_LayoutPipeline.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXRQaXBlbGluZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/tubaN/Desktop/tubaNWeb/Views/Shared/_LayoutPreview.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXRQcmV2aWV3LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/tubaN/Desktop/tubaNWeb/Views/Shared/_ValidationScriptsPartial.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/tubaN/Desktop/tubaNWeb/Views/_ViewImports.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/tubaN/Desktop/tubaNWeb/Views/_ViewStart.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/tubaN/Desktop/tubaNWeb/Views/Shared/_Layout.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = b-llbm6jfhyt

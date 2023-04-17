@@ -1,0 +1,89 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    Layout = null;
+    ViewData["Title"] = "시즌 추가";
+}
+
+
+
+<title>@ViewData["Title"]</title>
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+<style>
+	.container {
+/*		padding-left: 0;*/
+		width: 700px !important;
+		max-width: none !important;
+	}
+
+	@@media (max-width: 300px) {
+		.container {
+			width: 300px !important;
+		}
+	}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+
+<div id="id" style="display:none">Swal.fire</div>
+@Html.Raw(TempData["AddTitleAlert"])
+
+&nbsp;
+
+@*<div class="d-flex justify-content-center">*@
+<div class="container">
+
+    <form class="form" method="post" asp-controller="PreviewAdmin" asp-action="AddTitle">
+        @if (TempData["TitleModify"] != null && TempData["TitleModify"].Equals("Modify"))
+        {
+            <p style="text-align:center; font-size:30px; font-weight: 900;">시즌 수정</p>
+        }
+        else
+        {
+            <p style="text-align:center; font-size:30px; font-weight: 900;">시즌 추가</p>
+        }
+
+        <div class="form-group">
+            <label for="email">시즌 이름 (예시 : 'Larva Family')</label>
+            <input type="text" class="form-control" name="titleName" value="@TempData["TitleName"]" size=60 @* placeholder="Enter email"*@>
+        </div>
+        &nbsp;
+        <div class="form-group">
+            <label for="pwd">시즌 번호 (예시 : '1')</label>
+			<input type="text" class="form-control" name="sortNumber" value="@TempData["SortNumber"]">
+        </div>
+        &nbsp;
+		<div class="form-group">
+			<label for="pwd">이미지 경로 (예시 : 'LarvaFamily/title.jpg')</label>
+            <input type="text" class="form-control" name="imagePath" value="@TempData["ImagePath"]">
+		</div>
+        &nbsp;
+
+@*        <div class="checkbox">
+            <label><input type="checkbox"> Remember me</label>
+        </div>*@
+
+        <input type="hidden" name="processNumber" value=1>
+
+        @if (TempData["TitleModify"] != null && TempData["TitleModify"].Equals("Modify"))
+		{
+            <input type="hidden" name="uid" value=@TempData["Uid"]>
+            <div class="group" style=" text-align: center;">
+                <input type="submit" class="btn btn-sm btn-outline-secondary" value="수정" onclick="return confirm('타이틀을 수정 하시겠습니까?')">
+                <input type="button" class="btn btn-sm btn-outline-secondary" onclick="location.href='@Url.Action("Title","PreviewAlbum")'" value="취소">
+            </div>
+        }
+        else
+        {
+            <input type="hidden" name="uid" value=0xFFFFFFFF>
+            <div class="group" style=" text-align: center;">
+                <input type="submit" class="btn btn-sm btn-outline-secondary" value="추가" onclick="return confirm('타이틀을 추가 하시겠습니까?')">
+                <input type="button" class="btn btn-sm btn-outline-secondary" onclick="location.href='@Url.Action("Title","PreviewAlbum")'" value="취소">
+            </div>
+        }
+
+    </form>
+
+
+</div>

@@ -1,0 +1,303 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+	//Layout = null;
+	ViewData["Title"] = "로그 정보";
+
+	int startPage = 1;
+	int page = (int)ViewData["Page"];
+	int maxPage = (int)ViewData["MaxPage"];
+
+	string TableName = string.Empty;
+	foreach (var item in ViewBag.tableList)
+	{
+		if (item.IsSelected)
+		{
+			TableName = item.TableName;
+			break;
+		}
+	}
+
+	string fixedTableName = TableName.Replace("_log", string.Empty);
+}
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+	@*<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round">*@
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+@*	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">*@
+	<link rel="stylesheet" href="~/pipeline/css/table.css" asp-append-version="true" />
+	<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+
+	<link rel="stylesheet" href="/css/jquery-ui.min.css">
+	<script type='text/javascript' src='//code.jquery.com/jquery-1.8.3.js'></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.5.0/css/bootstrap-datepicker3.min.css">
+	<script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.5.0/js/bootstrap-datepicker.min.js"></script>
+	<script src="/js/bootstrap-datepicker.kr.js" charset="UTF-8"></script>
+
+
+
+	<style>
+		body {
+			color: #566787;
+			background: #f5f5f5;
+/*			font-family: 'Roboto', sans-serif;*/
+		}
+
+		.container-fluid {
+			/*width: 100%;*/
+			width: 1900px !important;
+			max-width: none !important;
+		}
+	</style>
+
+	<style>
+		.table-btn {
+			background-color: rgb(0, 50, 74);
+			color: #fff;
+		}
+
+			.table-btn:hover {
+				background-color: lightgrey;
+				transition: 0.7s;
+			}
+	</style>
+
+
+	<script type='text/javascript'>
+		$(function () {
+			$('.input-group.date').datepicker({
+				calendarWeeks: false,
+				todayHighlight: true,
+				autoclose: true,
+				format: "yyyy/mm/dd",
+				language: "kr"
+			});
+		});
+
+		//테이블 필터
+		$(document).ready(function () {
+			$(".btn-group .btn").click(function () {
+				var inputValue = $(this).find("input").val();
+				if (inputValue != 'all') {
+					var target = $('table tr[data-status="' + inputValue + '"]');
+					$("table tbody tr").not(target).hide();
+					target.fadeIn();
+				} else {
+					$("table tbody tr").fadeIn();
+				}
+			});
+			// Changing the class of status label to support Bootstrap 4
+			var bs = $.fn.tooltip.Constructor.VERSION;
+			var str = bs.split(".");
+			if (str[0] == 4) {
+				$(".label").each(function () {
+					var classStr = $(this).attr("class");
+					var newClassStr = classStr.replace(/label/g, "badge");
+					$(this).removeAttr("class").addClass(newClassStr);
+				});
+			}
+		});
+
+
+	</script>
+</head>
+
+
+
+<body>
+	<div class="menu">
+		<ul>
+			<li><a href="/PipelineProject/ProjectInformation">프로젝트 정보</a></li>
+			<li><a href="/PipelineAsset/AssetInformation">에셋 정보</a></li>
+			<li><a class="active" href="/PipelineLog/LogInformation">로그 정보</a></li>
+		</ul>
+	</div>
+
+
+
+	<div class="container-fluid">
+		<div class="jumbotron">
+			<h1 class="text-center">로그 정보</h1>
+
+			<div class="float-left" style="margin-left: -32px; margin-top: 25px">
+				<div class="btn-group btn-group-toggle" data-toggle="buttons">
+					@foreach (var item in ViewBag.tableList)
+					{
+						@if (item.IsSelected)
+						{
+							<label class="btn table-btn" onClick="window.location = '@Url.Action("LogInformation","PipelineLog", new {TableName = item.TableName})';" style="background-color: silver">
+								<input type="radio" name="options" id="option1" autocomplete="off">@item.TableName.Replace("_log", string.Empty)
+							</label>
+						}
+						else
+						{
+									<label class="btn table-btn" onClick="window.location = '@Url.Action("LogInformation","PipelineLog", new {TableName = item.TableName})';">
+								<input type="radio" name="options" id="option1" autocomplete="off">@item.TableName.Replace("_log", string.Empty)
+							</label>
+						}
+					}
+				</div>
+			</div>
+
+		</div>
+	</div>
+
+
+
+	<br />
+
+
+	<div class="container-fluid">
+		<form class="form" method="get">
+			<div class="row">
+				<div class="input-group date col-sm-1">
+					<input type="text" class="form-control" name="SearchDate1" placeholder="전체 날짜" value="@ViewData["SearchDate1"]" autocomplete="off"><span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+				</div>
+				<input type="hidden" name="SearchType" value=1>
+				<input type="hidden" name="TableName" value=@TableName>
+				<input class="btn btn-info col-xs-1" type="submit" value="날짜 검색" formaction="/PipelineLog/LogInformation" />
+			</div>
+		</form>
+
+		<hr />
+
+		<form class="form" method="get">
+			<div class="row">
+				<div class="input-group date col-sm-1">
+					<input type="text" class="form-control" name="SearchDate2" placeholder="전체 날짜" value="@ViewData["SearchDate2"]" autocomplete="off"><span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+				</div>
+				<input type="text" class="form-control col-sm-2" placeholder="컴퓨터 이름" name="SearchName" value="@ViewData["SearchName"]">
+				&nbsp;&nbsp;&nbsp;&nbsp;
+				<input type="hidden" name="SearchType" value=2>
+				<input type="hidden" name="TableName" value=@TableName>
+				<input class="btn btn-info col-xs-1" type="submit" value="이름 검색" formaction="/PipelineLog/LogInformation" />
+			</div>
+		</form>
+	</div>
+
+	<div class="container-fluid">
+		<hr />
+		<div class="table-responsive">
+			<div class="table-wrapper">
+				<div class="table-title">
+					<div class="row">
+						<div class="col-sm-6"><h2><b>@fixedTableName</b></h2></div>
+						<div class="col-sm-6">
+							<div class="btn-group" data-toggle="buttons">
+								<label class="btn btn-info active">
+									<input type="radio" name="status" value="all" checked="checked"> All
+								</label>
+								<label class="btn btn-success">
+									<input type="radio" name="status" value="confirm"> Confirm
+								</label>
+								<label class="btn btn-warning">
+									<input type="radio" name="status" value="warning"> Warning
+								</label>
+								<label class="btn btn-danger">
+									<input type="radio" name="status" value="error"> Error
+								</label>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<table class="table table-striped table-hover table-bordered">
+					<thead>
+						<tr>
+							<th>idx</th>
+							<th>name</th>
+							<th>type</th>
+							<th>log</th>
+							<th>time</th>
+						</tr>
+					</thead>
+
+
+
+					<tbody>
+						@foreach (var item in ViewBag.unrealLogDataList)
+						{
+							<tr data-status="@item.Type">
+								<td>@item.Idx</td>
+								<td>@item.Name</td>
+								<td>@item.Verbosity</td>
+								<td>@item.Log</td>
+								<td>@item.Time</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+
+				<hr />
+
+				@if ((bool)ViewData["IsPagination"])
+				{
+					<nav aria-label="...">
+						<ul class="pagination">
+							@if (page == 1)
+							{
+								<li class="page-item disabled"><a class="page-link">이전</a></li>
+							}
+							else
+							{
+								<li class="page-item"><a class="page-link" href="@("/PipelineLog/UnrealLog?searchType=1&&page=" + (page - 1))">이전</a></li>
+							}
+
+							@for (int i = 0; i < maxPage; i++)
+							{
+								if (page == i + 1)
+								{
+									<li class="page-item active"><span class="page-link">@(startPage + i)<span class="sr-only">(current)</span></span></li>
+								}
+								else
+								{
+									<li class="page-item"><a class="page-link" href="@("/PipelineLog/UnrealLog?searchType=1&&page=" + (startPage + i))">@(startPage + i)</a></li>
+								}
+							}
+
+							@if (page < maxPage)
+							{
+								<li class="page-item"><a class="page-link" href="@("/PipelineLog/UnrealLog?searchType=1&&page=" + (page + 1))">다음</a></li>
+							}
+							else
+							{
+								<li class="page-item disabled"><a class="page-link">다음</a></li>
+							}
+						</ul>
+					</nav>
+				}
+
+			</div>
+		</div>
+
+	</div>
+
+	<script>
+		//bootstrap - datepicker.kr.js
+		; (function ($) {
+			$.fn.datepicker.dates['kr'] = {
+				days: ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일", "일요일"],
+				daysShort: ["일", "월", "화", "수", "목", "금", "토", "일"],
+				daysMin: ["일", "월", "화", "수", "목", "금", "토", "일"],
+				months: ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"],
+				monthsShort: ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"]
+			};
+		}(jQuery));
+	</script>
+</body>
+</html>

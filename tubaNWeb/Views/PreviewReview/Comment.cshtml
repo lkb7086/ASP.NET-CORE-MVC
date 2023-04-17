@@ -1,0 +1,691 @@
+﻿@model tubaNWeb.Models.Preview.Comment
+
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+	Layout = "_LayoutPreview";
+	ViewData["Title"] = "리뷰";
+
+	bool isAdmin = false;
+	if (Context.Session.GetString("UserId") != null)
+	{
+		string userId = Context.Session.GetString("UserId");
+		if (userId.ToLower().Equals("admin"))
+		{
+			isAdmin = true;
+		}
+	}
+
+	string[] sortName = new string[3];
+	string[,] starCheck = new string[3, 10];
+	float starRating = 0.5f;
+	uint episodeUid = 0;
+	if (isAdmin == false)
+	{
+		for (int i = 0; i < starCheck.GetLength(0); i++)
+		{
+			for (int j = 0; j < starCheck.GetLength(1); j++)
+			{
+				if (ViewBag.CommentList[i].Rating == starRating)
+				{
+					starCheck[i, j] = "checked"; // disabled checked
+					break;
+				}
+				starRating += 0.5f;
+			}
+			starRating = 0.5f;
+		}
+	}
+	else
+	{
+		episodeUid = (uint)Context.Session.GetInt32("CurEpisode");
+
+		for (int i = 0; i < starCheck.GetLength(0); i++)
+		{
+			string view = string.Empty;
+			switch (i)
+			{
+				case 0:
+					view = "avgRating1";
+					break;
+				case 1:
+					view = "avgRating2";
+					break;
+				case 2:
+					view = "avgRating3";
+					break;
+				default:
+					break;
+			}
+
+			float avg = (float)ViewData[view];
+			for (int j = 0; j < starCheck.GetLength(1); j++)
+			{
+				if (avg == starRating)
+				{
+					starCheck[i, j] = "checked"; // disabled checked					
+				}
+				else
+				{
+					starCheck[i, j] = "disabled";
+				}
+				starRating += 0.5f;
+			}
+			starRating = 0.5f;
+		}
+
+		// 리뷰저장
+		if (ViewData["IsSaveComment"] != null && ViewData["IsSaveComment"].ToString() == "True")
+		{
+			try
+			{
+				using (StreamWriter writer = File.CreateText(System.IO.Directory.GetCurrentDirectory() + "\\wwwroot\\preview\\review_data\\all.txt"))
+				{
+					writer.Write(ViewData["Save0"].ToString());
+				}
+
+				using (StreamWriter writer = File.CreateText(System.IO.Directory.GetCurrentDirectory() + "\\wwwroot\\preview\\review_data\\good.txt"))
+				{
+					writer.Write(ViewData["Save1"].ToString());
+				}
+
+				using (StreamWriter writer = File.CreateText(System.IO.Directory.GetCurrentDirectory() + "\\wwwroot\\preview\\review_data\\bad.txt"))
+				{
+					writer.Write(ViewData["Save2"].ToString());
+				}
+
+				using (StreamWriter writer = File.CreateText(System.IO.Directory.GetCurrentDirectory() + "\\wwwroot\\preview\\review_data\\change.txt"))
+				{
+					writer.Write(ViewData["Save3"].ToString());
+				}
+
+				using (StreamWriter writer = File.CreateText(System.IO.Directory.GetCurrentDirectory() + "\\wwwroot\\preview\\review_data\\score.txt"))
+				{
+					writer.Write(ViewData["Save4"].ToString());
+				}
+
+				if (File.Exists(System.IO.Directory.GetCurrentDirectory() + "\\wwwroot\\preview\\review_data.zip"))
+				{
+					File.Delete(System.IO.Directory.GetCurrentDirectory() + "\\wwwroot\\preview\\review_data.zip");
+				}
+
+				System.IO.Compression.ZipFile.CreateFromDirectory(System.IO.Directory.GetCurrentDirectory() + "\\wwwroot\\preview\\review_data", System.IO.Directory.GetCurrentDirectory() + "\\wwwroot\\preview\\review_data.zip");
+			}
+			catch (Exception ex)
+			{
+				return;
+			}
+		}
+
+
+
+
+
+
+	}
+
+	string[] curTabNumber = new string[3];
+	string[] curTabShowActive = new string[3];
+	if (TempData["CurNumber"] != null)
+	{
+		switch (int.Parse(TempData["CurNumber"].ToString()))
+		{
+			case 1:
+				curTabNumber[0] = "active";
+				curTabShowActive[0] = "show active";
+				break;
+			case 2:
+				curTabNumber[1] = "active";
+				curTabShowActive[1] = "show active";
+				break;
+			case 3:
+				curTabNumber[2] = "active";
+				curTabShowActive[2] = "show active";
+				break;
+			default:
+				curTabNumber[0] = "active";
+				curTabShowActive[0] = "show active";
+				break;
+		}
+	}
+}
+
+
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+<link rel="stylesheet" href="~/preview/css/starrating.css" type="text/css" />
+<style>
+	/*	p {
+				margin: 20px 0px;
+			}
+
+			.embed-responsive {
+				max-height: 1450px;
+			}*/
+
+	.container {
+		width: 1450px !important;
+		max-width: none !important;
+		/*margin-left: 120px;*/
+	}
+
+	@@media (max-width: 300px) {
+		.container {
+			width: 300px !important;
+		}
+	}
+
+	/*	nav {
+			margin-right: -20.5px !important;
+		}*/
+
+	/*	.navbar-logintext {
+			margin-right: -19px !important;
+			text-decoration: underline;
+		}*/
+
+	.loginout {
+		/*margin-right: -135px !important;*/
+		margin-right: -15px !important;
+	}
+
+	.initpage {
+		/*margin-left: 135px !important;*/
+		margin-left: 15px !important;
+	}
+
+	/*	.layouthr {
+			position:  !important;
+		}*/
+</style>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+<script>
+	@if (isAdmin && ViewData["IsSaveComment"] != null && ViewData["IsSaveComment"].ToString() == "True")
+	{
+		<text>
+		setTimeout(function() { window.location = '/preview/review_data.zip'; }, 500)
+		</text>
+	}
+</script>
+
+
+
+
+
+<div id="id" style="display:none">Swal.fire</div>
+@*@Html.Raw(TempData["CommentAlertError1"])*@
+@Html.Raw(TempData["CommentAlert"])
+
+
+
+@if (isAdmin && ViewData["IsSaveComment"] != null && ViewData["IsSaveComment"].ToString() == "True")
+{
+	<a href="/preview/review_data.zip"></a>
+}
+
+
+
+<div class="container">
+	@*<hr />*@
+	<br />
+
+	<div class="row">
+		<div class="col">
+			<ul class="nav nav-tabs">
+				<li class="nav-item">
+					<a class="nav-link @curTabNumber[0]" data-toggle="tab" href="#qwe">애니메틱</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link @curTabNumber[1]" data-toggle="tab" href="#asd">애니메이션</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link @curTabNumber[2]" data-toggle="tab" href="#zxc">파이널</a>
+				</li>
+			</ul>
+			<div class="tab-content">
+				<div class="tab-pane fade @curTabShowActive[0]" id="qwe">
+					@*<div class="col text-right">*@
+					&nbsp;
+					<p align="center">
+						<button type="button" class="btn @ViewData["WhatworkColor0"] btn-lg btn-radius float-right" disabled>@ViewData["Whatwork0"]</button>
+						@if (ViewBag.CommentList[0].Whatwork > 0)
+						{
+							<label>내용은 익명으로 저장됩니다.평가는 하나만 작성 가능합니다.</label>
+						}
+					</p>
+					@*<button type="button" class="btn @ViewData["WhatworkColor0"] btn-lg btn-radius" disabled>@ViewData["Whatwork0"]</button>*@
+					@*</div>*@
+					&nbsp;
+					@if (ViewBag.CommentList[0].Whatwork > 0)
+					{
+						<div class="row">
+							<div class="col-12">
+								@*col-8*@
+								<div class="bs-example" data-example-id="responsive-embed-16by9-iframe-youtube">
+									<div class="embed-responsive embed-responsive-16by9">
+										<video controls class="embed-responsive-item" controlsList="nodownload" oncontextmenu="return false;">
+											<source src=@ViewBag.CommentList[0].Videolink type="video/mp4" />
+										</video>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						@:&nbsp;
+
+						<hr />
+
+						@if (isAdmin)
+						{
+							<div class="dropdown">
+								<button class="btn btn-outline-primary dropdown-toggle" type="button" data-toggle="dropdown" id="dropdownBtn">
+									@if (ViewData["CommentSortName1"] == null)
+									{
+										sortName[0] = "모두 보기";
+									}
+									else
+									{
+										sortName[0] = ViewData["CommentSortName1"].ToString();
+									}
+									@sortName[0]
+								</button>
+								<div class="dropdown-menu">
+									<a class="dropdown-item" href="@Url.Action("Comment","PreviewReview", new {uid = episodeUid, curNumber = 1, sort = 0 } )">모두 보기</a>
+									<a class="dropdown-item" href="@Url.Action("Comment","PreviewReview", new {uid = episodeUid, curNumber = 1, sort = 1 } )">만족한 점</a>
+									<a class="dropdown-item" href="@Url.Action("Comment","PreviewReview", new {uid = episodeUid, curNumber = 1, sort = 2 } )">부족한 점</a>
+									<a class="dropdown-item" href="@Url.Action("Comment","PreviewReview", new {uid = episodeUid, curNumber = 1, sort = 3 } )">바꿀 점</a>
+									<a class="dropdown-item" href="@Url.Action("Comment","PreviewReview", new {uid = episodeUid, curNumber = 1, sort = 4 } )">평가 점수</a>									
+								</div>
+							</div>
+						}
+
+						@:&nbsp;
+
+						<form id="comment-form" class="form" method="post" asp-controller="PreviewReview" asp-action="Comment">
+							@if (isAdmin == false)
+							{
+								<div class="form-group">
+									<label for="exampleFormControlTextarea3">어떤 점이 만족스러웠나요?</label>
+									<textarea class="form-control" id="exampleFormControlTextarea1" name="Writing1" rows="7" style="min-width: 50%">@ViewBag.CommentList[0].Writing1</textarea>
+								</div>
+
+								<div class="form-group">
+									<label for="exampleFormControlTextarea3">어떤 점이 부족 했나요?</label>
+									<textarea class="form-control" id="exampleFormControlTextarea2" name="Writing2" rows="7" style="min-width: 50%">@ViewBag.CommentList[0].Writing2</textarea>
+								</div>
+
+								<div class="form-group">
+									<label for="exampleFormControlTextarea3">어떤 점이 바뀌었으면 하나요?</label>
+									<textarea class="form-control" id="exampleFormControlTextarea3" name="Writing3" rows="7" style="min-width: 50%">@ViewBag.CommentList[0].Writing3</textarea>
+								</div>
+
+								@if (ViewBag.CommentList[0].Whatwork == 1)
+								{
+									<div>
+										별점을 선택해주세요.
+										@*<button type="submit" name="ProcessNumber" class="btn btn-warning btn-sm btn-radius" value=2>0</button>*@
+									</div>
+								}
+							}
+							else
+							{
+								<div class="form-group">
+									<textarea class="form-control" id="exampleFormControlTextarea3" rows="30" style="min-width: 50%">@ViewData["AdminText1"]</textarea>
+								</div>
+
+								@if (ViewBag.CommentList[0].Whatwork >= 1)
+								{
+									<div>
+										별점
+									</div>
+								}
+							}
+
+							<fieldset class="rating">
+								<input type="radio" id="stara9" name="rating" value="5" @starCheck[0, 9] />
+								<label class="full" for="stara9" title="Awesome - 5 stars"></label>
+								<input type="radio" id="stara8" name="rating" value="4.5" @starCheck[0, 8] />
+								<label class="half" for="stara8" title="Pretty good - 4.5 stars"></label>
+								<input type="radio" id="stara7" name="rating" value="4" @starCheck[0, 7] />
+								<label class="full" for="stara7" title="Pretty good - 4 stars"></label>
+								<input type="radio" id="stara6" name="rating" value="3.5" @starCheck[0, 6] />
+								<label class="half" for="stara6" title="Meh - 3.5 stars"></label>
+								<input type="radio" id="stara5" name="rating" value="3" @starCheck[0, 5] />
+								<label class="full" for="stara5" title="Meh - 3 stars"></label>
+								<input type="radio" id="stara4" name="rating" value="2.5" @starCheck[0, 4] />
+								<label class="half" for="stara4" title="Kinda bad - 2.5 stars"></label>
+								<input type="radio" id="stara3" name="rating" value="2" @starCheck[0, 3] />
+								<label class="full" for="stara3" title="Kinda bad - 2 stars"></label>
+								<input type="radio" id="stara2" name="rating" value="1.5" @starCheck[0, 2] />
+								<label class="half" for="stara2" title="Meh - 1.5 stars"></label>
+								<input type="radio" id="stara1" name="rating" value="1" @starCheck[0, 1] />
+								<label class="full" for="stara1" title="Sucks big time - 1 star"></label>
+								<input type="radio" id="stara0" name="rating" value="0.5" @starCheck[0, 0] />
+								<label class="half" for="stara0" title="Sucks big time - 0.5 stars"></label>
+							</fieldset>
+
+							@if (isAdmin == false)
+							{
+								<input type="hidden" id="CurNumber1" name="CurNumber" value=1>
+								@if (ViewBag.CommentList[0].Whatwork == 1)
+								{
+									<button type="submit" name="ProcessNumber" class="btn btn-info btn-md btn-lg col-2 float-right" value=1>적용</button> @*onclick="javascript:btn()"*@
+								}
+							}
+							else
+							{
+								<div style="text-align:center; margin-right:300px">
+									<b style="font-size:30px">@(ViewData["FieldCount1"] + "명 작성")</b>
+								@*<button type="submit" name="ProcessNumber" class="btn btn-info btn-md btn-lg col-2 float-right" value=1>저장</button>*@
+								</div>
+							}
+						</form>
+
+						@if (isAdmin)
+						{
+							<form method="post" asp-controller="PreviewAdmin" asp-action="SaveComment" onclick="return confirm('내용을 저장 하시겠습니까?')">
+								<input type="hidden" name="curNumber" value=1>
+								<button type="submit" class="btn btn-info btn-md btn-lg col-2 float-right" style="bottom:50px">저장</button>
+							</form>
+						}
+
+						@*onclick="return(false);"*@
+					}
+				</div>
+
+				<div class="tab-pane fade @curTabShowActive[1]" id="asd">
+					&nbsp;
+					<p align="center">
+						<button type="button" class="btn @ViewData["WhatworkColor1"] btn-lg btn-radius float-right" disabled>@ViewData["Whatwork1"]</button>
+						@if (ViewBag.CommentList[1].Whatwork > 0)
+						{
+							<label>내용은 익명으로 저장됩니다.평가는 하나만 작성 가능합니다.</label>
+						}
+					</p>
+					&nbsp;
+					@if (ViewBag.CommentList[1].Whatwork > 0)
+					{
+						<div class="row">
+							<div class="col-12">
+								<div class="bs-example" data-example-id="responsive-embed-16by9-iframe-youtube">
+									<div class="embed-responsive embed-responsive-16by9">
+										<video controls class="embed-responsive-item" controlsList="nodownload" oncontextmenu="return false;">
+											<source src=@ViewBag.CommentList[1].Videolink type="video/mp4" />
+										</video>
+									</div>
+								</div>
+							</div>
+						</div>
+
+
+						@:&nbsp;
+
+						<hr />
+
+						@if (isAdmin)
+						{
+							<div class="dropdown">
+								<button class="btn btn-outline-primary dropdown-toggle" type="button" data-toggle="dropdown" id="dropdownBtn">
+									@if (ViewData["CommentSortName2"] == null)
+									{
+										sortName[1] = "모두 보기";
+									}
+									else
+									{
+										sortName[1] = ViewData["CommentSortName2"].ToString();
+									}
+									@sortName[1]
+								</button>
+								<div class="dropdown-menu">
+									<a class="dropdown-item" href="@("/PreviewReview/Comment?uid=" + episodeUid + "&&curNumber=2&&sort=0")">모두 보기</a>
+									<a class="dropdown-item" href="@("/PreviewReview/Comment?uid=" + episodeUid + "&&curNumber=2&&sort=1")">만족한 점</a>
+									<a class="dropdown-item" href="@("/PreviewReview/Comment?uid=" + episodeUid + "&&curNumber=2&&sort=2")">부족한 점</a>
+									<a class="dropdown-item" href="@("/PreviewReview/Comment?uid=" + episodeUid + "&&curNumber=2&&sort=3")">바꿀 점</a>
+											<a class="dropdown-item" href="@("/PreviewReview/Comment?uid=" + episodeUid + "&&curNumber=2&&sort=4")">평가 점수</a>
+								</div>
+							</div>
+						}
+
+						@:&nbsp;
+
+						<form id="comment-form" class="form" method="post" asp-controller="PreviewReview" asp-action="Comment">
+							@if (isAdmin == false)
+							{
+								<div class="form-group">
+									<label for="exampleFormControlTextarea3">어떤 점이 만족스러웠나요?</label>
+									<textarea class="form-control" id="exampleFormControlTextarea4" name="Writing1" rows="7" style="min-width: 50%">@ViewBag.CommentList[1].Writing1</textarea>
+								</div>
+
+								<div class="form-group">
+									<label for="exampleFormControlTextarea3">어떤 점이 부족 했나요?</label>
+									<textarea class="form-control" id="exampleFormControlTextarea5" name="Writing2" rows="7" style="min-width: 50%">@ViewBag.CommentList[1].Writing2</textarea>
+								</div>
+
+								<div class="form-group">
+									<label for="exampleFormControlTextarea3">어떤 점이 바뀌었으면 하나요?</label>
+									<textarea class="form-control" id="exampleFormControlTextarea6" name="Writing3" rows="7" style="min-width: 50%">@ViewBag.CommentList[1].Writing3</textarea>
+								</div>
+
+								@if (ViewBag.CommentList[1].Whatwork == 1)
+								{
+									<div>
+										별점을 선택해주세요.
+										@*<button type="submit" name="ProcessNumber" class="btn btn-warning btn-sm btn-radius" value=2>0</button>*@
+									</div>
+								}
+							}
+							else
+							{
+								<div class="form-group">
+									<textarea class="form-control" id="exampleFormControlTextarea3" rows="30" style="min-width: 50%">@ViewData["AdminText2"]</textarea>
+								</div>
+
+								@if (ViewBag.CommentList[1].Whatwork >= 1)
+								{
+									<div>
+										별점
+									</div>
+								}
+							}
+
+							<fieldset class="rating">
+								<input type="radio" id="star15" name="rating" value="5" @starCheck[1, 9] />
+								<label class="full" for="star15" title="Awesome - 5 stars"></label>
+								<input type="radio" id="star14half" name="rating" value="4.5" @starCheck[1, 8] />
+								<label class="half" for="star14half" title="Pretty good - 4.5 stars"></label>
+								<input type="radio" id="star14" name="rating" value="4" @starCheck[1, 7] />
+								<label class="full" for="star14" title="Pretty good - 4 stars"></label>
+								<input type="radio" id="star13half" name="rating" value="3.5" @starCheck[1, 6] />
+								<label class="half" for="star13half" title="Meh - 3.5 stars"></label>
+								<input type="radio" id="star13" name="rating" value="3" @starCheck[1, 5] />
+								<label class="full" for="star13" title="Meh - 3 stars"></label>
+								<input type="radio" id="star12half" name="rating" value="2.5" @starCheck[1, 4] />
+								<label class="half" for="star12half" title="Kinda bad - 2.5 stars"></label>
+								<input type="radio" id="star12" name="rating" value="2" @starCheck[1, 3] />
+								<label class="full" for="star12" title="Kinda bad - 2 stars"></label>
+								<input type="radio" id="star11half" name="rating" value="1.5" @starCheck[1, 2] />
+								<label class="half" for="star11half" title="Meh - 1.5 stars"></label>
+								<input type="radio" id="star11" name="rating" value="1" @starCheck[1, 1] />
+								<label class="full" for="star11" title="Sucks big time - 1 star"></label>
+								<input type="radio" id="star1half" name="rating" value="0.5" @starCheck[1, 0] />
+								<label class="half" for="star1half" title="Sucks big time - 0.5 stars"></label>
+							</fieldset>
+
+							@if (isAdmin == false)
+							{
+								<input type="hidden" id="CurNumber2" name="CurNumber" value=2>
+								@if (ViewBag.CommentList[1].Whatwork == 1)
+								{
+									<button type="submit" name="ProcessNumber" class="btn btn-info btn-md btn-lg col-2 float-right" value=1>적용</button>
+								}
+							}
+							else
+							{
+								<div style="text-align:center; margin-right:300px">
+									<b style="font-size:30px">@(ViewData["FieldCount2"] + "명 작성")</b>
+								</div>
+							}
+						</form>
+
+						@if (isAdmin)
+						{
+							<form method="post" asp-controller="PreviewAdmin" asp-action="SaveComment" onclick="return confirm('내용을 저장 하시겠습니까?')">
+								<input type="hidden" name="curNumber" value=2>
+								<button type="submit" class="btn btn-info btn-md btn-lg col-2 float-right" style="bottom:50px">저장</button>
+							</form>
+						}
+					}
+				</div>
+
+				<div class="tab-pane fade @curTabShowActive[2]" id="zxc">
+					&nbsp;
+					<p align="center">
+						<button type="button" class="btn @ViewData["WhatworkColor2"] btn-lg btn-radius float-right" disabled>@ViewData["Whatwork2"]</button>
+						@if (ViewBag.CommentList[2].Whatwork > 0)
+						{
+							<label>내용은 익명으로 저장됩니다.평가는 하나만 작성 가능합니다.</label>
+						}
+					</p>
+					&nbsp;
+					@if (ViewBag.CommentList[2].Whatwork > 0)
+					{
+						<div class="row">
+							<div class="col-12">
+								<div class="bs-example" data-example-id="responsive-embed-16by9-iframe-youtube">
+									<div class="embed-responsive embed-responsive-16by9">
+										<video controls class="embed-responsive-item" controlsList="nodownload" oncontextmenu="return false;">
+											<source src=@ViewBag.CommentList[2].Videolink type="video/mp4" />
+										</video>
+									</div>
+								</div>
+							</div>
+						</div>
+
+
+						@:&nbsp;
+
+						<hr />
+
+						@if (isAdmin)
+						{
+							<div class="dropdown">
+								<button class="btn btn-outline-primary dropdown-toggle" type="button" data-toggle="dropdown" id="dropdownBtn">
+									@if (ViewData["CommentSortName3"] == null)
+									{
+										sortName[2] = "모두 보기";
+									}
+									else
+									{
+										sortName[2] = ViewData["CommentSortName3"].ToString();
+									}
+									@sortName[2]
+								</button>
+								<div class="dropdown-menu">
+									<a class="dropdown-item" href="@("/PreviewReview/Comment?uid=" + episodeUid + "&&curNumber=3&&sort=0")">모두 보기</a>
+									<a class="dropdown-item" href="@("/PreviewReview/Comment?uid=" + episodeUid + "&&curNumber=3&&sort=1")">만족한 점</a>
+									<a class="dropdown-item" href="@("/PreviewReview/Comment?uid=" + episodeUid + "&&curNumber=3&&sort=2")">부족한 점</a>
+									<a class="dropdown-item" href="@("/PreviewReview/Comment?uid=" + episodeUid + "&&curNumber=3&&sort=3")">바꿀 점</a>
+											<a class="dropdown-item" href="@("/PreviewReview/Comment?uid=" + episodeUid + "&&curNumber=3&&sort=4")">평가 점수</a>
+								</div>
+							</div>
+						}
+
+						@:&nbsp;
+
+						<form id="comment-form" class="form" method="post" asp-controller="PreviewReview" asp-action="Comment">
+							@if (isAdmin == false)
+							{
+								<div class="form-group">
+									<label for="exampleFormControlTextarea3">어떤 점이 만족스러웠나요?</label>
+									<textarea class="form-control" id="exampleFormControlTextarea7" name="Writing1" rows="7" style="min-width: 50%">@ViewBag.CommentList[2].Writing1</textarea>
+								</div>
+
+								<div class="form-group">
+									<label for="exampleFormControlTextarea3">어떤 점이 부족 했나요?</label>
+									<textarea class="form-control" id="exampleFormControlTextarea8" name="Writing2" rows="7" style="min-width: 50%">@ViewBag.CommentList[2].Writing2</textarea>
+								</div>
+
+								<div class="form-group">
+									<label for="exampleFormControlTextarea3">어떤 점이 바뀌었으면 하나요?</label>
+									<textarea class="form-control" id="exampleFormControlTextarea9" name="Writing3" rows="7" style="min-width: 50%">@ViewBag.CommentList[2].Writing3</textarea>
+								</div>
+
+								@if (ViewBag.CommentList[2].Whatwork == 1)
+								{
+									<div>
+										별점을 선택해주세요.
+										@*<button type="submit" name="ProcessNumber" class="btn btn-warning btn-sm btn-radius" value=2>0</button>*@
+									</div>
+								}
+							}
+							else
+							{
+								<div class="form-group">
+									<textarea class="form-control" id="exampleFormControlTextarea3" rows="30" style="min-width: 50%">@ViewData["AdminText3"]</textarea>
+								</div>
+
+								@if (ViewBag.CommentList[2].Whatwork >= 1)
+								{
+									<div>
+										별점
+									</div>
+								}
+							}
+
+							<fieldset class="rating">
+								<input type="radio" id="star25" name="rating" value="5" @starCheck[2, 9] />
+								<label class="full" for="star25" title="Awesome - 5 stars"></label>
+								<input type="radio" id="star24half" name="rating" value="4.5" @starCheck[2, 8] />
+								<label class="half" for="star24half" title="Pretty good - 4.5 stars"></label>
+								<input type="radio" id="star24" name="rating" value="4" @starCheck[2, 7] />
+								<label class="full" for="star24" title="Pretty good - 4 stars"></label>
+								<input type="radio" id="star23half" name="rating" value="3.5" @starCheck[2, 6] />
+								<label class="half" for="star23half" title="Meh - 3.5 stars"></label>
+								<input type="radio" id="star23" name="rating" value="3" @starCheck[2, 5] />
+								<label class="full" for="star23" title="Meh - 3 stars"></label>
+								<input type="radio" id="star22half" name="rating" value="2.5" @starCheck[2, 4] />
+								<label class="half" for="star22half" title="Kinda bad - 2.5 stars"></label>
+								<input type="radio" id="star22" name="rating" value="2" @starCheck[2, 3] />
+								<label class="full" for="star22" title="Kinda bad - 2 stars"></label>
+								<input type="radio" id="star21half" name="rating" value="1.5" @starCheck[2, 2] />
+								<label class="half" for="star21half" title="Meh - 1.5 stars"></label>
+								<input type="radio" id="star21" name="rating" value="1" @starCheck[2, 1] />
+								<label class="full" for="star21" title="Sucks big time - 1 star"></label>
+								<input type="radio" id="star2half" name="rating" value="0.5" @starCheck[2, 0] />
+								<label class="half" for="star2half" title="Sucks big time - 0.5 stars"></label>
+							</fieldset>
+
+							@if (isAdmin == false)
+							{
+								<input type="hidden" id="CurNumber3" name="CurNumber" value=3>
+								@if (ViewBag.CommentList[2].Whatwork == 1)
+								{
+									<button type="submit" name="ProcessNumber" class="btn btn-info btn-md btn-lg col-2 float-right" value=1>적용</button>
+								}
+							}
+							else
+							{
+								<div style="text-align:center; margin-right:300px">
+									<b style="font-size:30px">@(ViewData["FieldCount3"] + "명 작성")</b>
+								</div>
+							}
+						</form>
+
+						@if (isAdmin)
+						{
+							<form method="post" asp-controller="PreviewAdmin" asp-action="SaveComment" onclick="return confirm('내용을 저장 하시겠습니까?')">
+								<input type="hidden" name="curNumber" value=3>
+								<button type="submit" class="btn btn-info btn-md btn-lg col-2 float-right" style="bottom:50px">저장</button>
+							</form>
+						}
+					}
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
